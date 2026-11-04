@@ -1,4 +1,4 @@
-
+![Illustration du projet](./s-l300.png)
 
 
 
