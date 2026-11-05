@@ -72,3 +72,67 @@ Le client souhaite les indicateurs ci-dessous par domaines :
 - 🟢 Durée moyenne de traitement des commandes + commandes au-dessus de la moyenne de livraison : Mesurer l’efficacité opérationnelle en analysant le temps entre la date de commande et la date d’expédition.
 - ⚫ Taux d’écoulement des stocks : Mesurer la rapidité avec laquelle les stocks sont vendus pour chaque produit.
 - ⚫ Taux de commandes livrées en retard : Identifier les problèmes logistiques et améliorer les délais de livraison.
+
+# Mesures DAX réalisées 
+
+Voici ci-dessous les différentes mesures pour répondre aux besoins métiers et qui alimentent les visuels du Dashboard. Elles s'actualisent selon les filtres appliqués.
+
+### 📌 Ressources humaines - Performance des représentants commerciaux : 
+
+- Calculer le chiffre d’affaires généré par chaque employé chargé des ventes :
+
+**Règle de calcul :** Le numéro du salarié (employeeNumber) identifie chaque représentant. La mesure conserve ce filtre avec ALLEXCEPT, puis additionne le chiffre d’affaires des ventes associées à chaque employé
+
+```DAX
+CA_Commande_Rep = 
+CALCULATE(
+    SUM(FACT_Sales[CA]),
+    ALLEXCEPT(DIM_employees, DIM_employees[employeeNumber])
+)
+```
+
+### 📌 Ventes - Marge Brut Moy. par catégorie :
+
+- Comparer la marge unitaire moyenne par catégorie :
+
+**Règle de calcul :** Pour chaque ligne de vente, soustraire le prix d’achat unitaire (priceEach) du prix de vente unitaire (buyPrice), puis calculer la moyenne des écarts dans le contexte de filtres du rapport.
+
+```DAX
+Marge Brut Moyenne = 
+AVERAGEX(
+  FACT_Sales,
+  FACT_Sales[priceEach]-FACT_Sales[buyPrice]
+  )
+```
+
+
+### 📌 Finances — Chiffre d’affaires par client
+
+- Identifier les clients générant le plus de revenus pour mieux les fidéliser :
+
+**Règle de calcul :** La mesure additionne le chiffre d’affaires de `FACT_Sales`. Dans un visuel contenant le nom du client, le contexte de filtre calcule le total associé à chaque client. 
+Le tri du visuel permet de repérer les montants les plus élevés et les plus faibles.
+
+```DAX
+Chiffre d'affaire = 
+SUM(
+  FACT_Sales[CA]
+  )
+```
+
+### 📌 Logistique — Durée moyenne de traitement des commandes
+
+- Mesurer l’efficacité opérationnelle en analysant le temps entre la date de commande et la date d’expédition. :
+
+**Règle de calcul :** La colonne Delai_Traitement contient la durée entre la commande et son expédition. `ALLSELECTED` définit l’ensemble des commandes retenues par les sélections du rapport, comme les segments et les filtres. `AVERAGEX` calcule la moyenne de leur délai de traitement, et `CALCULATE` évalue cette moyenne dans le contexte du rapport.
+
+
+```DAX
+Durée moyenne de traitement = 
+CALCULATE(
+    AVERAGEX(
+        ALLSELECTED(DIM_orders),
+        DIM_orders[Delai_Traitement]
+    )
+)
+```
