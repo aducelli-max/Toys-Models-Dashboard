@@ -1,4 +1,4 @@
-![Illustration du projet](./Logo.png)
+![Logo du projet](./Captures%20d%27%C3%A9cran/Logo.png)
 
 
 
